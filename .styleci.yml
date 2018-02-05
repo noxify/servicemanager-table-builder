@@ -1,3 +1,4 @@
+php: false
 js:
   tab-width: 4
   use-tabs: false
