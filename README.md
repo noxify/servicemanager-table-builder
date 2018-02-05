@@ -27,12 +27,12 @@ Just create a new SL for each file and copy the file content inside the new crea
 
 ## Todos
 
-- [] more documentation for each field
-- [] Add more options
-- [] Add more field types
-- [] Add some aliases for Array fields 
-- [] Add new method to modify/extend a existing table
-- [] Make it easier to modify SQL field options
+- [ ] more documentation for each field
+- [ ] Add more options
+- [ ] Add more field types
+- [ ] Add some aliases for Array fields 
+- [ ] Add new method to modify/extend a existing table
+- [ ] Make it easier to modify SQL field options
 
 ## Examples
 
