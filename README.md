@@ -1,10 +1,19 @@
-# sm-table-creator
+# HP Service Manager Table Creator
 
-JS Library to create a new DBDICT via JS in HPSM
+JS Library to create a new DBDICT via JS in HP Service Manager (1).
 
 ## Installation
 
 Just create a new SL for each file and copy the file content inside the new created SLs :)
+
+
+## Tested with
+
+I have tested the library on:
+
+* Windows
+* Service Manager 9.52 and 9.60
+* MSSQL Server
 
 ## Available Fields
 
@@ -33,6 +42,7 @@ Just create a new SL for each file and copy the file content inside the new crea
 - [ ] Add some aliases for Array fields 
 - [ ] Add new method to modify/extend a existing table
 - [ ] Make it easier to modify SQL field options
+- [ ] Tests on UNIX and with other Databases
 
 ## Examples
 
@@ -119,3 +129,7 @@ Special thanks goes to:
 
 *  [yim OHG](https://www.y-im.de) - My old company :heart: My first version was built there and this version includes also some parts from Version 1 (see inline mentions ;) )
 * [ironboy](https://github.com/ironboy) - He is the creator of the awesome [classier](https://github.com/ironboy/classier) package. I had to modify the class a bit to make it work inside the HPSM.
+
+--- 
+
+(1) now it's Microfocus, but MFSM sounds not so good ;)
