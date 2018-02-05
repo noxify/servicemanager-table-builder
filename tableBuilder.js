@@ -56,14 +56,15 @@ var tableBuilder = classier.$extend({
         
         try {
             this.define(name, callback);
-            this.createTable(name);
+            var dbdict = this.prepareTable(name);
+            this.createSQLTable(dbdict);
         } catch(e) {
             print(e);
         } finally {
             this.cleanup();
         }
 
-        return 
+        return;
     },
 
     /**
@@ -101,26 +102,25 @@ var tableBuilder = classier.$extend({
         var dbdict = $('dbdict').select('name="' + name + '"').uniqueResult();
 
         if( dbdict == null ) {
-            dbdict         = new SCFile('dbdict');
+            dbdict = new SCFile('dbdict');
             dbdict['name'] = name;
         } else {
             throw "table already there!";
         }
 
-        _.each(this['convertedFields'], function(field, index) {
-                	
+        _.each(this['convertedFields'], function(field, index) {  
+
             dbdict['field'][index]['name'] = field['name'];
             dbdict['field'][index]['type'] = field['type'];
             dbdict['field'][index]['index'] = field['index'];
             dbdict['field'][index]['level'] = field['level'];
             
-            
             if( field['sql.field.options'] ) {
-            	_.each( field['sql.field.options'], function(value, key) {
-                	dbdict['field'][index]['sql.field.options'][key] = value;
-            	});
+                _.each( field['sql.field.options'], function(value, key) {
+                    dbdict['field'][index]['sql.field.options'][key] = value;
+                });
             }
-                        
+            
         });
         
         _.each(this['convertedKeys'], function(key, index) {
@@ -190,13 +190,13 @@ var tableBuilder = classier.$extend({
      * @return     {Object}
      */
     convertFields : function( fields, parent ) {
+
         var that = this;
 
         var level = (parent) ? parent.getLevel()+1 : 1;
         var index = 1; 
 
         _.each(fields, function(field) {
-
             field.setLevel(level);
             field.setIndex(index);
 
@@ -210,7 +210,6 @@ var tableBuilder = classier.$extend({
 
             delete field['children'];
             delete field['attributes'];
-
         });
 
         return that;
@@ -377,6 +376,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictField}
      */
     addDatetime : function(fieldname, attributes) {
+        
         var type = 3;
 
         var properties = {
@@ -384,6 +384,7 @@ var factoryClass = classier.$extend({
             'type' : type,
             'attributes' : (attributes) ? attributes : {}
         };
+
         return this.addField( properties ); 
     },
 
@@ -396,6 +397,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictField}
      */
     addLogical : function(fieldname, attributes) {
+        
         var type = 4;
 
         var properties = {
@@ -403,6 +405,7 @@ var factoryClass = classier.$extend({
             'type' : type,
             'attributes' : (attributes) ? attributes : {}
         };
+
         return this.addField( properties ); 
     },
 
@@ -416,6 +419,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictField}
      */
     addArray : function(fieldname, attributes, callback) {
+        
         var type = 8;
 
         var properties = {
@@ -443,6 +447,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictField}
      */
     addStructure : function(fieldname, attributes, callback) {
+        
         var type = 9;
 
         var properties = {
@@ -468,6 +473,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictKey}
      */
     addUniqueKey : function(fields) {
+        
         var type = 12;
 
         var properties = {
@@ -487,6 +493,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictKey}
      */
     addNoNullKey : function(fields) {
+        
         var type = 4;
 
         var properties = {
@@ -506,6 +513,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictKey}
      */
     addPrimaryKey : function(fields) {
+        
         var type = 28;
 
         var properties = {
@@ -525,6 +533,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictKey}
      */
     addNoDuplicateKey : function(fields) {
+        
         var type = 8;
 
         var properties = {
@@ -545,6 +554,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictKey}
      */
     addNullDuplicateKey : function(fields) {
+        
         var type = 0;
 
         var properties = {
@@ -574,7 +584,6 @@ var factoryClass = classier.$extend({
         return this.keys;
     },
 
-
     /**
      * Gets the sql type.
      * 
@@ -591,11 +600,13 @@ var factoryClass = classier.$extend({
 
         if(objDbInfo.success) {
 
-            var objType = _.find(objDbInfo['scfile']['data.types'], function(type){ return type['p4.type'] == nFieldType; });
+            var objType = _.find(objDbInfo['scfile']['data.types'], function(type) { 
+                return type['p4.type'] == nFieldType; 
+            });
+
             if( objType ) {
                 cSQLType = objType['sql.type'].toUpperCase();
             }
-            
         } 
 
         return cSQLType;
@@ -625,8 +636,10 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addField : function(properties) {
+
         var field = new this.$class(properties);
         this.children.push(field);
+
         return field;
     },
 
@@ -639,12 +652,15 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addNumber : function(fieldname, attributes) {
+
         var type = 1;
+
         var properties = {
             'name' : fieldname,
             'type' : type,
             'attributes' : (attributes) ? attributes : {}
         };
+
         return this.addField( properties ); 
     },
 
@@ -657,7 +673,9 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addCharacter : function(fieldname, attributes) {
+
         var type = 2;
+
         var properties = {
             'name' : fieldname,
             'type' : type,
@@ -666,9 +684,9 @@ var dbdictField = classier.$extend({
                'sql.data.type': this.getSQLType(type),
             },
         };
+
         return this.addField( properties ); 
     },
-
 
     /**
      * Adds a date/time field
@@ -679,6 +697,7 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addDatetime : function(fieldname, attributes) {
+        
         var type = 3;
 
         var properties = {
@@ -686,6 +705,7 @@ var dbdictField = classier.$extend({
             'type' : type,
             'attributes' : (attributes) ? attributes : {}
         };
+
         return this.addField( properties ); 
     },
 
@@ -698,6 +718,7 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addLogical : function(fieldname, attributes) {
+        
         var type = 4;
 
         var properties = {
@@ -705,6 +726,7 @@ var dbdictField = classier.$extend({
             'type' : type,
             'attributes' : (attributes) ? attributes : {}
         };
+
         return this.addField( properties ); 
     },
 
@@ -718,6 +740,7 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addArray : function(fieldname, attributes, callback) {
+        
         var type = 8;
 
         var properties = {
@@ -745,7 +768,9 @@ var dbdictField = classier.$extend({
      * @return     {dbdictField}
      */
     addStructure : function(fieldname, attributes, callback) {
+        
         var type = 9;
+        
         var properties = {
             'name' : fieldname,
             'type' : type,
@@ -828,7 +853,10 @@ var dbdictField = classier.$extend({
 
         if(objDbInfo.success) {
 
-            var objType = _.find(objDbInfo['scfile']['data.types'], function(dataType){ return dataType['p4.type'] == type; });
+            var objType = _.find(objDbInfo['scfile']['data.types'], function(dataType) { 
+                return dataType['p4.type'] == type; 
+            });
+
             if( objType ) {
                 sqltype = objType['sql.type'].toUpperCase();
             }
@@ -851,7 +879,6 @@ var dbdictKey = classier.$extend({
     __init__ : function(properties) {
     }
 });
-
 
 function getClass() {
     return tableBuilder;
