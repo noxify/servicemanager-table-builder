@@ -1,0 +1,20 @@
+php: false
+js:
+  tab-width: 4
+  use-tabs: false
+  print-width: 120
+  double-quotes: false
+  trailing-commas: es5
+  semicolons: true
+  arrow-parens: avoid
+  bracket-spacing: true
+  finder:
+    name:
+      - "*.js"
+    not-name:
+      - classier.js
+      - "*.min.js"
+ts: false
+css: false
+vue: false
+py: false
