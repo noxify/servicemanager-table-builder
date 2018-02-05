@@ -1,4 +1,5 @@
 php: false
+
 js:
   tab-width: 4
   use-tabs: false
@@ -14,7 +15,11 @@ js:
     not-name:
       - classier.js
       - "*.min.js"
+
 ts: false
+
 css: false
+
 vue: false
+
 py: false
