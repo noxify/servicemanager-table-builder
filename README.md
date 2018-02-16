@@ -19,6 +19,10 @@
 			- [Array of Logical](#array-of-logical)
 	- [Structure](#structure)
 	- [Expression](#expression)
+- [Field Options](#field-options)
+	- [Set SQL Type](#set-sql-type)
+	- [Set SQL Field Name](#set-sql-field-name)
+	- [Set SQL Table](#set-sql-table)
 - [Keys](#keys)
 	- [Unique](#unique)
 	- [Primary](#primary)
@@ -69,7 +73,6 @@ Currently there is no plan to deliver a unload file.
 - [] more documentation for each field
 - [] Add more options
 - [] Add new method to modify/extend a existing table
-- [] Make it easier to modify SQL field options
 
 <a name="fields"></a>
 ## Fields
@@ -106,7 +109,7 @@ builder.addLogical('fieldname');
 ### Array
 
 ```js
-builder.addArray('fieldname', {}, function(item) {
+builder.addArray('fieldname', function(item) {
 	//all field types are allowed
 });
 ```
@@ -146,7 +149,7 @@ builder.addArrayOfLogical('fieldname');
 ### Structure
 
 ```js
-builder.addStructure("filter", {}, function(item) {
+builder.addStructure("filter", function(item) {
 	item.addCharacter("filter.sql");
 });
 ```
@@ -156,6 +159,42 @@ builder.addStructure("filter", {}, function(item) {
 
 ```js
 builder.addExpression('fieldname');
+```
+
+<a name="field-options"></a>
+## Field Options
+
+<a name="set-sql-type"></a>
+### Set SQL Type
+
+For common fields, you can change field SQL Type.
+
+```js
+builder.addCharacter("textfield").setSqlType("NVARCHAR(100)");
+``` 
+
+<a name="set-sql-field-name"></a>
+### Set SQL Field Name
+
+Overwrites the default sql field name with the defined value.
+
+```js
+builder.addCharacter("textfield").setSqlName("AWESOMETEXTFIELD");
+```
+
+<a name="set-sql-table"></a>
+### Set SQL Table
+
+If you want, you can move a field to another table alias (e.g. from M1 to M2).
+
+> :exclamation: All following fields will be attached to `M2`. 
+> If you want only one field in a new table, add the field at the end of your definition
+> or add `.setSqlTable("M1")` to the next field. 
+> 
+> This is an HPSM problem - I have tested it with the dbdidct utilities and the result was the same!
+
+```js
+builder.addCharacter("textfield").setSqlTable("M2");
 ```
 
 <a name="keys"></a>
@@ -264,16 +303,16 @@ tableClass.make('complextable', function(builder) {
 	builder.addNumber('id');
 	builder.addLogical('is_active');
 
-	builder.addArray("longdescription", {}, function(item) {
+	builder.addArray("longdescription", function(item) {
 		item.addCharacter("longdescription");
 	});
 	
-	builder.addStructure("filter", {}, function(item) {
+	builder.addStructure("filter", function(item) {
 		item.addCharacter("filter.sql");
 	});
 	
-	builder.addArray("rule", {}, function(item) {
-		item.addStructure("rule", {}, function(subitem) {
+	builder.addArray("rule", function(item) {
+		item.addStructure("rule", function(subitem) {
 			subitem.addNumber("ruleId");
 		});
 	});

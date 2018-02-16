@@ -311,6 +311,7 @@ var factoryClass = classier.$extend({
      * @return     {dbdictField}
      */
     addField : function(properties) {
+        properties['sql.field.options'] = {};
         var field = new dbdictField(properties);
         this.fields.push(field);
         return field;
@@ -337,13 +338,13 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addNumber : function(fieldname, attributes) {
+    addNumber : function(fieldname) {
         var type = 1;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
         return this.addField( properties ); 
     },
@@ -356,13 +357,13 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addCharacter : function(fieldname, attributes) {
+    addCharacter : function(fieldname) {
         var type = 2;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
         return this.addField( properties ); 
     },
@@ -375,14 +376,14 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addDatetime : function(fieldname, attributes) {
+    addDatetime : function(fieldname) {
         
         var type = 3;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -396,14 +397,14 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addLogical : function(fieldname, attributes) {
+    addLogical : function(fieldname) {
         
         var type = 4;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -418,14 +419,14 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArray : function(fieldname, attributes, callback) {
+    addArray : function(fieldname, callback) {
         
         var type = 8;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         var field = this.addField( properties ); 
@@ -446,14 +447,14 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addStructure : function(fieldname, attributes, callback) {
+    addStructure : function(fieldname, callback) {
         
         var type = 9;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         var field = this.addField( properties ); 
@@ -473,14 +474,14 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addExpression : function(fieldname, attributes) {
+    addExpression : function(fieldname) {
         
         var type = 11;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -494,9 +495,9 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfNumber : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addNumber(fieldname, attributes);
+    addArrayOfNumber : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addNumber(fieldname);
         });
     },
 
@@ -508,9 +509,9 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfCharacter : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addCharacter(fieldname, attributes);
+    addArrayOfCharacter : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addCharacter(fieldname);
         });
     },
 
@@ -522,9 +523,9 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfDatetime : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addDatetime(fieldname, attributes);
+    addArrayOfDatetime : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addDatetime(fieldname);
         });
     },
 
@@ -536,9 +537,9 @@ var factoryClass = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfLogical : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addLogical(fieldname, attributes);
+    addArrayOfLogical : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addLogical(fieldname);
         });
     },
 
@@ -621,7 +622,6 @@ var factoryClass = classier.$extend({
 
         return this.addKey( properties ); 
     },
-
 
     /**
      * Adds a null duplicate key.
@@ -724,6 +724,8 @@ var dbdictField = classier.$extend({
      */
     addField : function(properties) {
 
+        properties['sql.field.options'] = {};
+
         var field = new this.$class(properties);
         this.children.push(field);
 
@@ -738,14 +740,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addNumber : function(fieldname, attributes) {
+    addNumber : function(fieldname) {
 
         var type = 1;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -759,17 +761,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addCharacter : function(fieldname, attributes) {
+    addCharacter : function(fieldname) {
 
         var type = 2;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {},
-            'sql.field.options': {
-               'sql.data.type': this.getSQLType(type),
-            },
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -783,14 +782,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addDatetime : function(fieldname, attributes) {
+    addDatetime : function(fieldname) {
         
         var type = 3;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -804,14 +803,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addLogical : function(fieldname, attributes) {
+    addLogical : function(fieldname) {
         
         var type = 4;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -826,14 +825,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArray : function(fieldname, attributes, callback) {
+    addArray : function(fieldname, callback) {
         
         var type = 8;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         var field = this.addField( properties ); 
@@ -854,14 +853,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addStructure : function(fieldname, attributes, callback) {
+    addStructure : function(fieldname, callback) {
         
         var type = 9;
         
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         var field = this.addField( properties ); 
@@ -881,14 +880,14 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addExpression : function(fieldname, attributes) {
+    addExpression : function(fieldname) {
         
         var type = 11;
 
         var properties = {
             'name' : fieldname,
             'type' : type,
-            'attributes' : (attributes) ? attributes : {}
+            'attributes' : {}
         };
 
         return this.addField( properties ); 
@@ -902,9 +901,9 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfNumber : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addNumber(fieldname, attributes);
+    addArrayOfNumber : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addNumber(fieldname);
         });
     },
 
@@ -916,9 +915,9 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfCharacter : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addCharacter(fieldname, attributes);
+    addArrayOfCharacter : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addCharacter(fieldname);
         });
     },
 
@@ -930,9 +929,9 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfDatetime : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addDatetime(fieldname, attributes);
+    addArrayOfDatetime : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addDatetime(fieldname);
         });
     },
 
@@ -944,10 +943,46 @@ var dbdictField = classier.$extend({
      *
      * @return     {dbdictField}
      */
-    addArrayOfLogical : function(fieldname, attributes) {
-        return this.addArray(fieldname, attributes, function(item) {
-            item.addLogical(fieldname, attributes);
+    addArrayOfLogical : function(fieldname) {
+        return this.addArray(fieldname, function(item) {
+            item.addLogical(fieldname);
         });
+    },
+
+    /**
+     * Sets the sql type.
+     *
+     * @param      {string}  sqltype  The sql type
+     *
+     * @return     {dbdictfield}
+     */
+    setSqlType : function(sqltype) {
+        this['sql.field.options']['sql.data.type'] = sqltype;
+        return this;
+    },
+
+    /**
+     * Sets the sql field name.
+     *
+     * @param      {string}  sqlname  The sql field name
+     *
+     * @return     {dbdictfield}
+     */
+    setSqlName : function(sqlname) {
+        this['sql.field.options']['sql.column.name'] = sqlname;
+        return this;
+    },
+
+    /**
+     * Sets the sql table.
+     *
+     * @param      {string}  sqltable  The sql table
+     *
+     * @return     {dbdictfield}
+     */
+    setSqlTable : function(sqltable) {
+        this['sql.field.options']['sql.table.alias'] = sqltable;
+        return this;
     },
 
     /**
@@ -1047,3 +1082,4 @@ var dbdictKey = classier.$extend({
 function getClass() {
     return tableBuilder;
 }
+//
