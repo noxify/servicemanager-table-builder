@@ -407,7 +407,7 @@ var factoryClass = classier.$extend({
         };
 
         return this.addField( properties ); 
-    },
+    },   
 
     /**
      * Adds an array field
@@ -463,6 +463,83 @@ var factoryClass = classier.$extend({
         }
 
         return field;
+    },
+
+    /**
+     * Adds an expression field.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addExpression : function(fieldname, attributes) {
+        
+        var type = 11;
+
+        var properties = {
+            'name' : fieldname,
+            'type' : type,
+            'attributes' : (attributes) ? attributes : {}
+        };
+
+        return this.addField( properties ); 
+    }, 
+
+    /**
+     * Adds an array of number.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfNumber : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addNumber(fieldname, attributes);
+        });
+    },
+
+    /**
+     * Adds an array of character.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfCharacter : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addCharacter(fieldname, attributes);
+        });
+    },
+
+    /**
+     * Adds an array of datetime.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfDatetime : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addDatetime(fieldname, attributes);
+        });
+    },
+
+    /**
+     * Adds an array of logical.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfLogical : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addLogical(fieldname, attributes);
+        });
     },
 
     /**
@@ -564,6 +641,16 @@ var factoryClass = classier.$extend({
         };
 
         return this.addKey( properties ); 
+    },
+
+    /**
+     * Helper function to add the sysmod* fields
+     * without defining each field 
+     */
+    withSysmodFields : function() {
+        this.addNumber('sysmodcount');
+        this.addCharacter('sysmoduser');
+        this.addDatetime('sysmodtime');
     },
 
     /**
@@ -784,6 +871,83 @@ var dbdictField = classier.$extend({
         }
 
         return field;
+    },
+
+    /**
+     * Adds an expression field.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addExpression : function(fieldname, attributes) {
+        
+        var type = 11;
+
+        var properties = {
+            'name' : fieldname,
+            'type' : type,
+            'attributes' : (attributes) ? attributes : {}
+        };
+
+        return this.addField( properties ); 
+    }, 
+    
+    /**
+     * Adds an array of number.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfNumber : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addNumber(fieldname, attributes);
+        });
+    },
+
+    /**
+     * Adds an array of character.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfCharacter : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addCharacter(fieldname, attributes);
+        });
+    },
+
+    /**
+     * Adds an array of datetime.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfDatetime : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addDatetime(fieldname, attributes);
+        });
+    },
+
+    /**
+     * Adds an array of logical.
+     *
+     * @param      {string}  fieldname   The fieldname
+     * @param      {Object}  attributes  The attributes
+     *
+     * @return     {dbdictField}
+     */
+    addArrayOfLogical : function(fieldname, attributes) {
+        return this.addArray(fieldname, attributes, function(item) {
+            item.addLogical(fieldname, attributes);
+        });
     },
 
     /**

@@ -1,22 +1,60 @@
-# sm-table-creator
+# Table of Contents
 
-JS Library to create a new DBDICT via JS in HPSM
+<!-- MarkdownTOC -->
 
+- [Installation][installation]
+- [Available Fields][available-fields]
+- [Available Keys][available-keys]
+- [Todos][todos]
+- [Fields][fields]
+	- [Number][number]
+	- [Character][character]
+	- [Date/Time][datetime]
+	- [Logical][logical]
+	- [Array][array]
+		- [Available Aliases][available-aliases]
+			- [Array of Number][array-of-number]
+			- [Array of Character][array-of-character]
+			- [Array of Date/Time][array-of-datetime]
+			- [Array of Logical][array-of-logical]
+	- [Structure][structure]
+	- [Expression][expression]
+- [Keys][keys]
+	- [Unique][unique]
+	- [Primary][primary]
+	- [No Null][no-null]
+	- [No Duplicates][no-duplicates]
+	- [Nulls & Duplicates][nulls--duplicates]
+- [Helpers][helpers]
+	- [Sysmod Fields][sysmod-fields]
+- [Examples][examples]
+	- [Simple example][simple-example]
+	- [Complexe example][complexe-example]
+- [Credits][credits]
+
+<!-- /MarkdownTOC -->
+
+
+<a name="installation"></a>
 ## Installation
 
-Just create a new SL for each file and copy the file content inside the new created SLs :)
+Just create a new ScriptLibrary for each file and copy the file content inside the new created ScriptLibrary.
+Currently there is no plan to deliver a unload file.
 
+<a name="available-fields"></a>
 ## Available Fields
 
-| Type      | SM Type |
-|-----------|---------|
-| Number    | 1       |  
-| Character | 2       |
-| Date/Time | 3       |
-| Logical   | 4       |
-| Array     | 8       |
-| Structure | 9       |
+| Type       | SM Type |
+|------------|---------|
+| Number     | 1       |  
+| Character  | 2       |
+| Date/Time  | 3       |
+| Logical    | 4       |
+| Array      | 8       |
+| Structure  | 9       |
+| Expression | 11      |
 
+<a name="available-keys"></a>
 ## Available Keys
 
 * Unique
@@ -25,17 +63,162 @@ Just create a new SL for each file and copy the file content inside the new crea
 * No Duplicates
 * Nulls & Duplicates
 
+<a name="todos"></a>
 ## Todos
 
 - [] more documentation for each field
 - [] Add more options
-- [] Add more field types
-- [] Add some aliases for Array fields 
 - [] Add new method to modify/extend a existing table
 - [] Make it easier to modify SQL field options
 
+<a name="fields"></a>
+## Fields
+
+<a name="number"></a>
+### Number
+
+```js
+builder.addNumber('fieldname');
+```
+
+<a name="character"></a>
+### Character
+
+```js
+builder.addCharacter('fieldname');
+```
+
+<a name="datetime"></a>
+### Date/Time
+
+```js
+builder.addDatetime('fieldname');
+```
+
+<a name="logical"></a>
+### Logical
+
+```js
+builder.addLogical('fieldname');
+```
+
+<a name="array"></a>
+### Array
+
+```js
+builder.addArray('fieldname', {}, function(item) {
+	//all field types are allowed
+});
+```
+
+<a name="available-aliases"></a>
+#### Available Aliases
+
+<a name="array-of-number"></a>
+##### Array of Number
+
+```js
+builder.addArrayOfNumber('fieldname');
+```
+
+<a name="array-of-character"></a>
+##### Array of Character
+
+```js
+builder.addArrayOfCharacter('fieldname');
+```
+
+<a name="array-of-datetime"></a>
+##### Array of Date/Time
+
+```js
+builder.addArrayOfDatetime('fieldname');
+```
+
+<a name="array-of-logical"></a>
+##### Array of Logical
+
+```js
+builder.addArrayOfLogical('fieldname');
+```
+
+<a name="structure"></a>
+### Structure
+
+```js
+builder.addStructure("filter", {}, function(item) {
+	item.addCharacter("filter.sql");
+});
+```
+
+<a name="expression"></a>
+### Expression 
+
+```js
+builder.addExpression('fieldname');
+```
+
+<a name="keys"></a>
+## Keys
+
+<a name="unique"></a>
+### Unique
+
+```js
+builder.addUniqueKey(['fieldname']);
+```
+
+<a name="primary"></a>
+### Primary
+
+```js
+builder.addPrimaryKey(['fieldname']);
+```
+
+<a name="no-null"></a>
+### No Null
+
+```js
+builder.addNoNullKey(['fieldname']);
+```
+
+<a name="no-duplicates"></a>
+### No Duplicates
+
+```js
+builder.addNoDuplicateKey(['fieldname']);
+```
+
+<a name="nulls--duplicates"></a>
+### Nulls & Duplicates
+
+```js
+builder.addNullDuplicateKey(['fieldname']);
+```
+
+<a name="helpers"></a>
+## Helpers
+
+<a name="sysmod-fields"></a>
+### Sysmod Fields
+
+Instead of 
+
+```js
+builder.addCharacter('sysmoduser');
+builder.addDatetime('sysmodtime');
+builder.addNumber('sysmodcount');
+```
+
+in your definition, you can use this:
+```js
+builder.withSysmodFields();
+```
+
+<a name="examples"></a>
 ## Examples
 
+<a name="simple-example"></a>
 ### Simple example
 
 ```js
@@ -66,6 +249,7 @@ Table simpletable has been created successfully.
 ```
 
 
+<a name="complexe-example"></a>
 ### Complexe example
 
 ```js
@@ -94,10 +278,8 @@ tableClass.make('complextable', function(builder) {
 		});
 	});
 
-	builder.addCharacter('sysmoduser');
-	builder.addDatetime('sysmodtime');
-	builder.addNumber('sysmodcount');
-
+	builder.withSysmodFields();
+	
 	builder.addUniqueKey(['id']);
 
 });
@@ -113,6 +295,7 @@ Table complextable has been created successfully.
 ```
 
 
+<a name="credits"></a>
 ## Credits
 
 Special thanks goes to:
