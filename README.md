@@ -2,35 +2,35 @@
 
 <!-- MarkdownTOC -->
 
-- [Installation][installation]
-- [Available Fields][available-fields]
-- [Available Keys][available-keys]
-- [Todos][todos]
-- [Fields][fields]
-	- [Number][number]
-	- [Character][character]
-	- [Date/Time][datetime]
-	- [Logical][logical]
-	- [Array][array]
-		- [Available Aliases][available-aliases]
-			- [Array of Number][array-of-number]
-			- [Array of Character][array-of-character]
-			- [Array of Date/Time][array-of-datetime]
-			- [Array of Logical][array-of-logical]
-	- [Structure][structure]
-	- [Expression][expression]
-- [Keys][keys]
-	- [Unique][unique]
-	- [Primary][primary]
-	- [No Null][no-null]
-	- [No Duplicates][no-duplicates]
-	- [Nulls & Duplicates][nulls--duplicates]
-- [Helpers][helpers]
-	- [Sysmod Fields][sysmod-fields]
-- [Examples][examples]
-	- [Simple example][simple-example]
-	- [Complexe example][complexe-example]
-- [Credits][credits]
+- [Installation](#installation)
+- [Available Fields](#available-fields)
+- [Available Keys](#available-keys)
+- [Todos](#todos)
+- [Fields](#fields)
+	- [Number](#number)
+	- [Character](#character)
+	- [Date/Time](#datetime)
+	- [Logical](#logical)
+	- [Array](#array)
+		- [Available Aliases](#available-aliases)
+			- [Array of Number](#array-of-number)
+			- [Array of Character](#array-of-character)
+			- [Array of Date/Time](#array-of-datetime)
+			- [Array of Logical](#array-of-logical)
+	- [Structure](#structure)
+	- [Expression](#expression)
+- [Keys](#keys)
+	- [Unique](#unique)
+	- [Primary](#primary)
+	- [No Null](#no-null)
+	- [No Duplicates](#no-duplicates)
+	- [Nulls & Duplicates](#nulls--duplicates)
+- [Helpers](#helpers)
+	- [Sysmod Fields](#sysmod-fields)
+- [Examples](#examples)
+	- [Simple example](#simple-example)
+	- [Complexe example](#complexe-example)
+- [Credits](#credits)
 
 <!-- /MarkdownTOC -->
 
