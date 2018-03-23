@@ -42,12 +42,15 @@ var tableBuilder = classier.$extend({
         this.definedTables = {};
         this.convertedFields = [];
         this.convertedKeys = [];
+        this.dbdictObject = {};
+        this.isModify = false;
     },
 
     /**
-     * Wrapper to define the fields, keys and other stuff
+     * Wrapper to create a new dbdict 
+     * define the fields, keys and other stuff
      * 
-     * It handles all other method calls to make it as easy as possible
+     * It handles all other method calls to make the definition as easy as possible
      *
      * @param      {String}     name      The table name
      * @param      {Function}   callback  The callback
@@ -68,6 +71,34 @@ var tableBuilder = classier.$extend({
     },
 
     /**
+     * Wrapper to modify an existing dbdict 
+     * define the fields, keys and other stuff
+     * 
+     * It handles all other method calls to make the definition as easy as possible
+     *
+     * @param      {String}     name      The table name
+     * @param      {Function}   callback  The callback
+     */
+    modify : function(name, callback) {
+
+        try {
+            this.isModify = true;
+            this.dbdictObject = this.getDbdictObject(name);
+
+            this.define(name, callback);
+            var dbdict = this.prepareExistingTable(name);
+
+            this.modifyTable(dbdict);
+        } catch(e) {
+            print(e);
+        } finally {
+            this.cleanup();
+        }
+
+        return;    
+    },
+
+    /**
      * Internal function which calls the factory class
      * to create new fields, keys and other stuff inside
      * the make method.
@@ -78,7 +109,7 @@ var tableBuilder = classier.$extend({
      * @return     {Object} The Factory response
      */
     define : function(name, callback) { 
-        var builder = new factoryClass();
+        var builder = new factoryClass(this.dbdictObject, this.isModify);
 
         this.definedTables[name] = builder;
 
@@ -132,6 +163,71 @@ var tableBuilder = classier.$extend({
     },
 
     /**
+     * Get the existing dbdict file and prepare it 
+     * with all given definitions
+     *
+     * @param      {string}  name    The table name
+     *
+     * @return     {SCFile}
+     */
+    prepareExistingTable : function(name) {
+
+        this.convertDefinition(name);
+
+        var dbdict = $('dbdict').select('name="' + name + '"').uniqueResult();
+
+        if( dbdict == null ) {
+            throw "table does not exists. Please use the make method to create a new dbdict!";
+        }
+
+        var nLastFieldIndex = this.getLastFieldIndex()+1;
+
+        _.each(this['convertedFields'], function(field) {  
+
+            //TODO: find a better way for this
+            if( field['useExistingIndex'] ) {
+
+                dbdict['field'][field.getIndex()]['name'] = field['name'];
+                dbdict['field'][field.getIndex()]['type'] = field['type'];
+                dbdict['field'][field.getIndex()]['index'] = field['index'];
+                dbdict['field'][field.getIndex()]['level'] = field['level'];
+                
+                if( field['sql.field.options'] ) {
+                    _.each( field['sql.field.options'], function(value, key) {
+                        dbdict['field'][field.getIndex()]['sql.field.options'][key] = value;
+                    });
+                }
+
+            } else {
+
+                dbdict['field'][nLastFieldIndex]['name'] = field['name'];
+                dbdict['field'][nLastFieldIndex]['type'] = field['type'];
+                dbdict['field'][nLastFieldIndex]['index'] = field['index'];
+                dbdict['field'][nLastFieldIndex]['level'] = field['level'];
+                
+                if( field['sql.field.options'] ) {
+                    _.each( field['sql.field.options'], function(value, key) {
+                        dbdict['field'][nLastFieldIndex]['sql.field.options'][key] = value;
+                    });
+                }
+
+                nLastFieldIndex++;
+            }
+        });
+        
+        
+        var nLastKeyIndex = this.getLastKeyIndex()+1;
+
+        _.each(this['convertedKeys'], function(key) {
+            dbdict['key'][nLastKeyIndex]['name'] = key['name'];
+            dbdict['key'][nLastKeyIndex]['flags'] = key['flags'];
+            nLastKeyIndex++;
+        });
+        
+        return dbdict;
+    },
+
+    /**
      * Creates a dbdict & sql table.
      * 
      * @author     yim OHG, info@y-im.de
@@ -162,6 +258,73 @@ var tableBuilder = classier.$extend({
     },
 
     /**
+     * Saves the dbdict modifications and updates the SQL Table
+     *
+     * @param      {SCFile}  dbdict  The dbdict
+     *
+     * @return     {Boolean}
+     */
+    modifyTable : function(dbdict) {
+
+        if (this.saveSqlChanges(dbdict) == true) {
+            return this.saveChanges(dbdict);
+        } else {
+            throw "Unable to save the changes to SQL";
+        }
+    },
+
+    /**
+     * Saves changes into the dbdict.
+     *
+     * @param      {SCFile}   dbdict  The dbdict
+     *
+     * @return     {boolean}
+     */
+    saveChanges : function(dbdict) {
+        var rcUpdate = dbdict.doUpdate();
+            
+        if ( rcUpdate == RC_SUCCESS) {
+            return true;
+        } else {
+            throw "Unable to save Dbdict: "+rcUpdate;
+        }
+    },
+
+    /**
+     * Saves the sql changes.
+     *
+     * @param      {SCFile}  dbdict  The dbdict
+     *
+     * @return     {Boolean}
+     */
+    saveSqlChanges : function(dbdict) {
+        
+        var rteReturnValue ;
+        var rteNames = new SCDatum();
+        var rteValues = new SCDatum();      
+        rteNames.push("record");          
+        rteNames.push("all.null");
+        rteNames.push("boolean1");
+        rteValues.setType(8);
+        
+        rteValues.push(dbdict);
+        rteValues.push(true);
+        rteValues.push(true);
+        
+        var rteReturnValue = new SCDatum();
+        
+        //this rad app will have to run in the same thread
+        var result = system.functions.rtecall("callrad", 
+                                rteReturnValue, 
+                                "dbdict.sql.changes", //RAD app name
+                                rteNames, 
+                                rteValues,
+                                false); //false to run in same thread, true to run in new thread
+        
+        return  result;
+    },
+
+    /**
      * Converts the given Definition of fields and keys
      * and adds also the descriptor field
      *
@@ -171,10 +334,14 @@ var tableBuilder = classier.$extend({
         
         var objTable = this.getDefintion(name);
         
-        this.convertFields( objTable['fields']);
-        this.convertKeys( objTable['keys']);
+        this.convertFields( objTable['fields'] );
+        this.convertKeys( objTable['keys'] );
 
-        if( !this.hasDescriptor() ) {
+        if( this.isModify ) {
+            this.convertModifiedFields( objTable['modifyFields'] );
+        }
+
+        if( !this.hasDescriptor() && !this.isModify ) {
             this.addDescriptor();
         }
 
@@ -194,7 +361,7 @@ var tableBuilder = classier.$extend({
         var that = this;
 
         var level = (parent) ? parent.getLevel()+1 : 1;
-        var index = 1; 
+        var index = (this.isModify && !parent) ? this.getLastFieldIndex()+1 : 1; 
 
         _.each(fields, function(field) {
             field.setLevel(level);
@@ -207,6 +374,25 @@ var tableBuilder = classier.$extend({
             }
             
             index++;
+
+            delete field['children'];
+            delete field['attributes'];
+        });
+
+        return that;
+    },
+
+    convertModifiedFields : function( fields, parent ) {
+
+        var that = this;
+
+        _.each(fields, function(field) {
+
+            JSON.stringify(field, "", "    ");
+            field.setLevel(field['attributes']['level']);
+            field.setIndex(field['attributes']['index']);
+
+            that.convertedFields.push(field);
 
             delete field['children'];
             delete field['attributes'];
@@ -281,6 +467,39 @@ var tableBuilder = classier.$extend({
     },
 
     /**
+     * Gets the dbdict as object.
+     *
+     * @param      {Character}  cTablename   The tablename
+     *
+     * @return     {Object}  The dbdict object.
+     */
+    getDbdictObject : function(cTablename) {
+        var fDbdict = $('dbdict').select('name="'+cTablename+'"').uniqueResult();
+        var xmlNode = fDbdict.getXML();
+        var objFile = new Parser(xmlNode).toJSON();
+        return objFile;
+    },
+
+    /**
+     * Gets the last field index.
+     *
+     * @return     {Number}  The last field index.
+     */
+    getLastFieldIndex : function() {
+        var objLastField = _.last(this['dbdictObject']['instance']['field']);
+        return system.functions.val(objLastField['index'],1);
+    },
+    
+    /**
+     * Gets the last key index.
+     *
+     * @return     {Number}  The last key index.
+     */
+    getLastKeyIndex : function() {
+        return system.functions.val(this['dbdictObject']['instance']['key'].length,1);
+    },
+
+    /**
      * Remove all temporary generated stuff
      * Without this, we will have some memory leaks ;)
      */
@@ -288,6 +507,8 @@ var tableBuilder = classier.$extend({
         this.definedTables = {};
         this.convertedFields = [];
         this.convertedKeys = [];
+        this.dbdictObject = {};
+        this.isModify = false;
     }
 });
 
@@ -298,9 +519,13 @@ var factoryClass = classier.$extend({
     /**
      * Init Function
      */
-    __init__ : function() {
+    __init__ : function(dbdictObject, isModify) {
         this.fields = [];
+        this.modifyFields = [];
+        this.deleteFields = [];
         this.keys = [];
+        this.dbdictObject = dbdictObject;
+        this.isModify = isModify;
     },
 
     /**
@@ -311,9 +536,60 @@ var factoryClass = classier.$extend({
      * @return     {dbdictField}
      */
     addField : function(properties) {
+        
+        if( this.isModify ) {
+            if( this.fieldExists(properties['name']) ) {
+                return null;
+            }
+        } 
+
         properties['sql.field.options'] = {};
         var field = new dbdictField(properties);
         this.fields.push(field);
+        return field;
+    },
+
+    /**
+     * Renames a field
+     *
+     * @param      {Character}       currentField  The current field
+     * @param      {Character}       newName       The new name
+     * @param      {Boolean}         withSql       Rename also the SQL Name
+     *
+     * @return     {dbdictField} 
+     */
+    renameField : function(currentField, newName, withSql) {
+        if( !this.isModify ) {
+            return null;
+        }
+
+        var objField = _.findWhere(this.dbdictObject['instance']['field'], {'name': currentField});
+
+        //currently only number, character, date/time and logical fields are allowed
+        //TODO: allow each field type
+        if( !objField || objField['level'] == 0 || objField['type'] == 8 || objField['type'] == 9 || objField['type'] == 11 ) {
+            return null;
+        }
+
+        var properties = {
+            'name' : newName,
+            'type' :  system.functions.val(objField['type'], 1),
+            'attributes' : {
+                'level' : system.functions.val(objField['level'], 1),
+                'index' : system.functions.val(objField['index'], 1),
+                'useExistingIndex' : true
+            },
+            'sql.field.options' : {}
+        };
+
+        if( withSql ) {
+            properties['sql.field.options']['sql.column.name'] = null;
+
+        }
+
+        var field = new dbdictField(properties);
+        this.modifyFields.push(field);
+
         return field;
     },
 
@@ -697,6 +973,18 @@ var factoryClass = classier.$extend({
         } 
 
         return cSQLType;
+    },
+
+    /**
+     * Checks if a field already exists in the dbdict
+     *
+     * @param      {Character}  cName   The name
+     *
+     * @return     {boolean}
+     */
+    fieldExists : function(cName) {
+        var objField = _.findWhere(this.dbdictObject['instance']['field'], {'name': cName});
+        return (_.isUndefined(objField)) ? false : true;
     }
 });
 
@@ -713,6 +1001,7 @@ var dbdictField = classier.$extend({
         this.children = [];
         this.level = 0;
         this.index = 0;
+        this.useExistingIndex = (properties['attributes']['useExistingIndex']) ? properties['attributes']['useExistingIndex'] : false;
     },
 
     /**
@@ -1078,6 +1367,54 @@ var dbdictKey = classier.$extend({
     __init__ : function(properties) {
     }
 });
+
+/**
+ * Dbdict to Object Parser
+ * Copied from SL debugUtils
+ *
+ * @param      {XML}  node    SCFile as XML 
+ *
+ * @return     {Object}  Converted SCFile
+ */
+var Parser = function(node) {
+    this.toJSON = function() {
+        var result = {};
+        foreach(node, function(node) { processField(node, result); });
+        return result;
+    };
+
+    function foreach(node, action) {
+        var node = node.getFirstChildElement();
+        while (node != null) {
+            action(node);
+            node = node.getNextSiblingElement();
+        }
+    }
+
+    function processField(node, result) {
+        var name = node.getNodeName();
+        result[name] = processFieldValue(node);
+    }
+
+    function processFieldValue(node) {
+        var result = null;
+        switch (node.getAttributeValue("type") || node.getAttributeValue("sctype")) {
+            case "":
+            case "structure":
+                result = {};
+                foreach(node, function(node) { processField(node, result); });
+                break;
+            case "array":
+                result = [];
+                foreach(node, function(node) { result.push(processFieldValue(node)); });
+                break;
+            default:
+                result = node.getNodeValue();
+                break;
+        }
+        return result;
+    }
+};
 
 function getClass() {
     return tableBuilder;
