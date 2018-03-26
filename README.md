@@ -3,6 +3,8 @@
 <!-- MarkdownTOC -->
 
 - [Installation](#installation)
+- [Make a table](#make-a-table)
+- [Update a table](#update-a-table)
 - [Available Fields](#available-fields)
 - [Available Keys](#available-keys)
 - [Todos](#todos)
@@ -19,6 +21,8 @@
 			- [Array of Logical](#array-of-logical)
 	- [Structure](#structure)
 	- [Expression](#expression)
+- [Modify Methods](#modify-methods)
+	- [renameField](#renamefield)
 - [Field Options](#field-options)
 	- [Set SQL Type](#set-sql-type)
 	- [Set SQL Field Name](#set-sql-field-name)
@@ -32,20 +36,68 @@
 - [Helpers](#helpers)
 	- [Sysmod Fields](#sysmod-fields)
 - [Examples](#examples)
-	- [Simple example](#simple-example)
-	- [Complexe example](#complexe-example)
+	- [Simple create example](#simple-create-example)
+	- [Complexe create example](#complexe-create-example)
+	- [Modify table example](#modify-table-example)
 - [Credits](#credits)
 
 <!-- /MarkdownTOC -->
 
 
-<a name="installation"></a>
+<a id="installation"></a>
 ## Installation
 
 Just create a new ScriptLibrary for each file and copy the file content inside the new created ScriptLibrary.
 Currently there is no plan to deliver a unload file.
 
-<a name="available-fields"></a>
+<a id="make-a-table"></a>
+## Make a table
+
+To create a new dbdict table, you have to use the `make` method.
+
+```js
+var tableBuilder = system.library.tableBuilder.getClass();
+
+
+var schema = new tableBuilder();
+
+schema.make('complextable', function(builder) {
+
+	/**
+	 * Allowed methods are:
+	 * * all methods to add a field
+	 * * all methods to add a key
+	 */
+
+});
+```
+
+
+<a id="update-a-table"></a>
+## Update a table
+
+To create a new dbdict table, you have to use the `modify` method.
+
+```js
+var tableBuilder = system.library.tableBuilder.getClass();
+
+
+var schema = new tableBuilder();
+
+schema.modify('complextable', function(builder) {
+
+	/**
+	 * Allowed methods are:
+	 * * all methods to add a field
+	 * * all methods to add a key
+	 * * rename a field
+	 */
+
+});
+```
+
+
+<a id="available-fields"></a>
 ## Available Fields
 
 | Type       | SM Type |
@@ -58,7 +110,7 @@ Currently there is no plan to deliver a unload file.
 | Structure  | 9       |
 | Expression | 11      |
 
-<a name="available-keys"></a>
+<a id="available-keys"></a>
 ## Available Keys
 
 * Unique
@@ -67,45 +119,44 @@ Currently there is no plan to deliver a unload file.
 * No Duplicates
 * Nulls & Duplicates
 
-<a name="todos"></a>
+<a id="todos"></a>
 ## Todos
 
 - [] more documentation for each field
 - [] Add more options
-- [] Add new method to modify/extend a existing table
 
-<a name="fields"></a>
+<a id="fields"></a>
 ## Fields
 
-<a name="number"></a>
+<a id="number"></a>
 ### Number
 
 ```js
 builder.addNumber('fieldname');
 ```
 
-<a name="character"></a>
+<a id="character"></a>
 ### Character
 
 ```js
 builder.addCharacter('fieldname');
 ```
 
-<a name="datetime"></a>
+<a id="datetime"></a>
 ### Date/Time
 
 ```js
 builder.addDatetime('fieldname');
 ```
 
-<a name="logical"></a>
+<a id="logical"></a>
 ### Logical
 
 ```js
 builder.addLogical('fieldname');
 ```
 
-<a name="array"></a>
+<a id="array"></a>
 ### Array
 
 ```js
@@ -114,38 +165,40 @@ builder.addArray('fieldname', function(item) {
 });
 ```
 
-<a name="available-aliases"></a>
+
+<a id="available-aliases"></a>
 #### Available Aliases
 
-<a name="array-of-number"></a>
+
+<a id="array-of-number"></a>
 ##### Array of Number
 
 ```js
 builder.addArrayOfNumber('fieldname');
 ```
 
-<a name="array-of-character"></a>
+<a id="array-of-character"></a>
 ##### Array of Character
 
 ```js
 builder.addArrayOfCharacter('fieldname');
 ```
 
-<a name="array-of-datetime"></a>
+<a id="array-of-datetime"></a>
 ##### Array of Date/Time
 
 ```js
 builder.addArrayOfDatetime('fieldname');
 ```
 
-<a name="array-of-logical"></a>
+<a id="array-of-logical"></a>
 ##### Array of Logical
 
 ```js
 builder.addArrayOfLogical('fieldname');
 ```
 
-<a name="structure"></a>
+<a id="structure"></a>
 ### Structure
 
 ```js
@@ -154,17 +207,35 @@ builder.addStructure("filter", function(item) {
 });
 ```
 
-<a name="expression"></a>
+<a id="expression"></a>
 ### Expression 
 
 ```js
 builder.addExpression('fieldname');
 ```
 
-<a name="field-options"></a>
+<a id="modify-methods"></a>
+## Modify Methods
+
+<a id="renamefield"></a>
+### renameField
+
+Currently, the rename works only for simple fields (`number`, `character`, `date/time`, `logical`).
+
+Rename the field, but keep the SQL Name
+```js
+builder.renameField('is_active', 'isActive');
+```
+
+Rename the field and update the SQL Name.
+```js
+builder.renameField('is_active', 'isActive', true);
+```
+
+<a id="field-options"></a>
 ## Field Options
 
-<a name="set-sql-type"></a>
+<a id="set-sql-type"></a>
 ### Set SQL Type
 
 For common fields, you can change field SQL Type.
@@ -173,7 +244,7 @@ For common fields, you can change field SQL Type.
 builder.addCharacter("textfield").setSqlType("NVARCHAR(100)");
 ``` 
 
-<a name="set-sql-field-name"></a>
+<a id="set-sql-field-name"></a>
 ### Set SQL Field Name
 
 Overwrites the default sql field name with the defined value.
@@ -182,7 +253,7 @@ Overwrites the default sql field name with the defined value.
 builder.addCharacter("textfield").setSqlName("AWESOMETEXTFIELD");
 ```
 
-<a name="set-sql-table"></a>
+<a id="set-sql-table"></a>
 ### Set SQL Table
 
 If you want, you can move a field to another table alias (e.g. from M1 to M2).
@@ -197,48 +268,48 @@ If you want, you can move a field to another table alias (e.g. from M1 to M2).
 builder.addCharacter("textfield").setSqlTable("M2");
 ```
 
-<a name="keys"></a>
+<a id="keys"></a>
 ## Keys
 
-<a name="unique"></a>
+<a id="unique"></a>
 ### Unique
 
 ```js
 builder.addUniqueKey(['fieldname']);
 ```
 
-<a name="primary"></a>
+<a id="primary"></a>
 ### Primary
 
 ```js
 builder.addPrimaryKey(['fieldname']);
 ```
 
-<a name="no-null"></a>
+<a id="no-null"></a>
 ### No Null
 
 ```js
 builder.addNoNullKey(['fieldname']);
 ```
 
-<a name="no-duplicates"></a>
+<a id="no-duplicates"></a>
 ### No Duplicates
 
 ```js
 builder.addNoDuplicateKey(['fieldname']);
 ```
 
-<a name="nulls--duplicates"></a>
+<a id="nulls--duplicates"></a>
 ### Nulls & Duplicates
 
 ```js
 builder.addNullDuplicateKey(['fieldname']);
 ```
 
-<a name="helpers"></a>
+<a id="helpers"></a>
 ## Helpers
 
-<a name="sysmod-fields"></a>
+<a id="sysmod-fields"></a>
 ### Sysmod Fields
 
 Instead of 
@@ -254,19 +325,19 @@ in your definition, you can use this:
 builder.withSysmodFields();
 ```
 
-<a name="examples"></a>
+<a id="examples"></a>
 ## Examples
 
-<a name="simple-example"></a>
-### Simple example
+<a id="simple-create-example"></a>
+### Simple create example
 
 ```js
 var tableBuilder = system.library.tableBuilder.getClass();
 
 
-var simpleTable = new tableBuilder();
+var schema = new tableBuilder();
 
-tableClass.make('simpletable', function(builder) {
+schema.make('simpletable', function(builder) {
 	
 	builder.addNumber('id');
 	builder.addLogical('is_active');
@@ -287,18 +358,17 @@ You should see a new entry in your `Messages` with something like:
 Table simpletable has been created successfully.
 ```
 
-
-<a name="complexe-example"></a>
-### Complexe example
+<a id="complexe-create-example"></a>
+### Complexe create example
 
 ```js
 
 var tableBuilder = system.library.tableBuilder.getClass();
 
 
-var complex = new tableBuilder();
+var schema = new tableBuilder();
 
-tableClass.make('complextable', function(builder) {
+schema.make('complextable', function(builder) {
 	
 	builder.addNumber('id');
 	builder.addLogical('is_active');
@@ -325,6 +395,25 @@ tableClass.make('complextable', function(builder) {
 
 ```
 
+<a id="modify-table-example"></a>
+### Modify table example
+
+```js
+
+var tableBuilder = system.library.tableBuilder.getClass();
+
+
+var schema = new tableBuilder();
+
+schema.modify('complextable', function(builder) {
+	//add a new field to the existing table
+	builder.addNumber('reference.id');
+	builder.renameField('is_active', 'isActive', true);	
+});
+
+
+```
+
 Expected result after running the code:
 
 You should see a new entry in your `Messages` with something like:
@@ -333,8 +422,7 @@ You should see a new entry in your `Messages` with something like:
 Table complextable has been created successfully.
 ```
 
-
-<a name="credits"></a>
+<a id="credits"></a>
 ## Credits
 
 Special thanks goes to:
