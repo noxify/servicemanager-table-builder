@@ -3,6 +3,7 @@
 <!-- MarkdownTOC -->
 
 - [Installation](#installation)
+- [Supported Databases](#supported-databases)
 - [Make a table](#make-a-table)
 - [Update a table](#update-a-table)
 - [Available Fields](#available-fields)
@@ -49,6 +50,11 @@
 
 Just create a new ScriptLibrary for each file and copy the file content inside the new created ScriptLibrary.
 Currently there is no plan to deliver a unload file.
+
+<a id="supported-databases"></a>
+## Supported Databases
+* MSSQL - tested with SM 9.52 and SM9.60
+* Postgres - tested with ITSMA ( SM9.52 )
 
 <a id="make-a-table"></a>
 ## Make a table
