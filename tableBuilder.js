@@ -89,6 +89,9 @@ var tableBuilder = classier.$extend({
             var dbdict = this.prepareExistingTable(name);
 
             this.modifyTable(dbdict);
+
+            print("Table "+name+" has been updated successfully.");
+
         } catch(e) {
             print(e);
         } finally {
@@ -213,6 +216,7 @@ var tableBuilder = classier.$extend({
 
                 nLastFieldIndex++;
             }
+            
         });
         
         
@@ -349,7 +353,7 @@ var tableBuilder = classier.$extend({
     },
 
     /**
-     * Converts each key definition to a usable object for HPSM
+     * Converts the added fields for each key definition to a usable object for HPSM
      *
      * @param      {Object}  fields  The fields
      * @param      {Object}  parent  The parent
@@ -382,6 +386,14 @@ var tableBuilder = classier.$extend({
         return that;
     },
 
+    /**
+     * Converts the modified fields for each key definition to a usable object for HPSM
+     *
+     * @param      {Object}  fields  The fields
+     * @param      {Object}  parent  The parent
+     * 
+     * @return     {Object}
+     */
     convertModifiedFields : function( fields, parent ) {
 
         var that = this;
@@ -539,6 +551,7 @@ var factoryClass = classier.$extend({
         
         if( this.isModify ) {
             if( this.fieldExists(properties['name']) ) {
+                print("Field "+properties['name']+" already exists.");
                 return null;
             }
         } 
@@ -565,8 +578,11 @@ var factoryClass = classier.$extend({
 
         var objField = _.findWhere(this.dbdictObject['instance']['field'], {'name': currentField});
 
-        //currently only number, character, date/time and logical fields are allowed
-        //TODO: allow each field type
+        /**
+         * currently only number, character, date/time and logical fields are allowed
+         * TODO: check how we can implement all field types
+         * We have to ensure, that all depths are renamed (e.g. array of array of array of array of character)
+         */
         if( !objField || objField['level'] == 0 || objField['type'] == 8 || objField['type'] == 9 || objField['type'] == 11 ) {
             return null;
         }
