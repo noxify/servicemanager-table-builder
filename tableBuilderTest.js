@@ -3,7 +3,7 @@ var tableBuilderClass = system.library.tableBuilder.getClass();
 
 var schema = new tableBuilderClass();
 
-tableClass.make( "testtable001", function(builder) {
+schema.make( "testtable001", function(builder) {
 	
 	builder.addNumber("field1");
 	builder.addCharacter("field2");
