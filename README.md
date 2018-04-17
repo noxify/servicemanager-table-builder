@@ -82,7 +82,7 @@ schema.make('complextable', function(builder) {
 <a id="update-a-table"></a>
 ## Update a table
 
-To create a new dbdict table, you have to use the `modify` method.
+To update a existing dbdict table, you have to use the `modify` method.
 
 ```js
 var tableBuilder = system.library.tableBuilder.getClass();
