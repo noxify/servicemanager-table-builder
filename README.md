@@ -238,6 +238,15 @@ Rename the field and update the SQL Name.
 builder.renameField('is_active', 'isActive', true);
 ```
 
+### setLength
+
+Updates the sql length of a field.
+The method uses the information from the `sqldbinfo` table to determines if the current field has the `Get Size` option.
+
+```js
+builder.setLength('brief.description', 500);
+```
+
 <a id="field-options"></a>
 ## Field Options
 
@@ -378,6 +387,7 @@ schema.make('complextable', function(builder) {
 	
 	builder.addNumber('id');
 	builder.addLogical('is_active');
+	builder.addCharacter('brief.description');
 
 	builder.addArray("longdescription", function(item) {
 		item.addCharacter("longdescription");
@@ -415,6 +425,7 @@ schema.modify('complextable', function(builder) {
 	//add a new field to the existing table
 	builder.addNumber('reference.id');
 	builder.renameField('is_active', 'isActive', true);	
+	builder.setLength('brief.description', 500);	
 });
 
 

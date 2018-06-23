@@ -538,6 +538,7 @@ var factoryClass = classier.$extend({
         this.keys = [];
         this.dbdictObject = dbdictObject;
         this.isModify = isModify;
+        this.sqlInfo = new sqlInfo();
     },
 
     /**
@@ -602,6 +603,45 @@ var factoryClass = classier.$extend({
             properties['sql.field.options']['sql.column.name'] = null;
 
         }
+
+        var field = new dbdictField(properties);
+        this.modifyFields.push(field);
+
+        return field;
+    },
+
+    /**
+     * Sets the length.
+     *
+     * @param      {string}       currentField  The current field
+     * @param      {string}       newLength     The new length
+     *
+     * @return     {dbdictField}
+     */
+    setLength : function(currentField, newLength) {
+        if( !this.isModify ) {
+            return null;
+        }
+
+        var objField = _.findWhere(this.dbdictObject['instance']['field'], {'name': currentField});
+        var hasSize = this.sqlInfo.hasSize(objField['type']);
+        
+        if( !objField || objField['level'] == 0 || !hasSize ) {
+            return null;
+        }
+
+        var properties = {
+            'name' : currentField,
+            'type' :  system.functions.val(objField['type'], 1),
+            'attributes' : {
+                'level' : system.functions.val(objField['level'], 1),
+                'index' : system.functions.val(objField['index'], 1),
+                'useExistingIndex' : true
+            },
+            'sql.field.options' : {
+                'sql.data.type' : this.sqlInfo.getSQLType(objField['type'])+'('+newLength+')'
+            }
+        };
 
         var field = new dbdictField(properties);
         this.modifyFields.push(field);
@@ -964,34 +1004,6 @@ var factoryClass = classier.$extend({
     },
 
     /**
-     * Gets the sql type.
-     * 
-     * @author     yim OHG, https://www.y-im.de, info@y-im.de
-     *
-     * @param      {integer}  type  The field type
-     *
-     * @return     {string}  The sql type.
-     */
-    getSQLType : function( nFieldType ) {
-
-        var cSQLType = "NVARCHAR";
-        var objDbInfo = $('sqldbinfo').select('sql.db.type="'+ system.functions.dbdict_helper("db.type") +'"');
-
-        if(objDbInfo.success) {
-
-            var objType = _.find(objDbInfo['scfile']['data.types'], function(type) { 
-                return type['p4.type'] == nFieldType; 
-            });
-
-            if( objType ) {
-                cSQLType = objType['sql.type'].toUpperCase();
-            }
-        } 
-
-        return cSQLType;
-    },
-
-    /**
      * Checks if a field already exists in the dbdict
      *
      * @param      {Character}  cName   The name
@@ -1018,6 +1030,7 @@ var dbdictField = classier.$extend({
         this.level = 0;
         this.index = 0;
         this.useExistingIndex = (properties['attributes']['useExistingIndex']) ? properties['attributes']['useExistingIndex'] : false;
+        this.sqlInfo = new sqlInfo();
     },
 
     /**
@@ -1339,35 +1352,6 @@ var dbdictField = classier.$extend({
      */
     getIndex : function() {
         return this.index;
-    },
-
-    /**
-     * Gets the sql type.
-     * 
-     * @author     yim OHG, https://www.y-im.de, info@y-im.de
-     *
-     * @param      {integer}  type  The field type
-     *
-     * @return     {string}  The sql type.
-     */
-    getSQLType : function( type ) {
-
-        var sqltype = "NVARCHAR";
-        var objDbInfo = $('sqldbinfo').select('sql.db.type="'+ system.functions.dbdict_helper("db.type") +'"');
-
-        if(objDbInfo.success) {
-
-            var objType = _.find(objDbInfo['scfile']['data.types'], function(dataType) { 
-                return dataType['p4.type'] == type; 
-            });
-
-            if( objType ) {
-                sqltype = objType['sql.type'].toUpperCase();
-            }
-            
-        } 
-
-        return sqltype;
     }
 });
 
@@ -1381,6 +1365,98 @@ var dbdictKey = classier.$extend({
      * @param      {Object}  properties  The properties
      */
     __init__ : function(properties) {
+    }
+});
+
+var sqlInfo = classier.$extend({
+    _class : "sqlInfo",
+
+    /**
+     * Init Function
+     */
+    __init__ : function() {
+        this.sqlInfo = this.getSqlInfo();
+    }, 
+
+    /**
+     * Gets the sql information.
+     *
+     * @return     {Object}  The sql information.
+     */
+    getSqlInfo : function() {
+        var objDbInfo = $('sqldbinfo').select('sql.db.type="'+ system.functions.dbdict_helper("db.type") +'"');
+        var objFile = {};
+
+        if(objDbInfo.success) {
+            var xmlNode = objDbInfo['scfile'].getXML();
+            objFile = new Parser(xmlNode).toJSON();
+        }
+
+        return objFile['instance'];
+    },
+
+    /**
+     * Gets the sql type.
+     * 
+     * @author     yim OHG, https://www.y-im.de, info@y-im.de
+     *
+     * @param      {integer}  type  The field type
+     *
+     * @return     {string}  The sql type.
+     */
+    getSQLType : function( nFieldType ) {
+
+        var cSQLType = this.getFallbackSqlType();
+
+        var objType = _.find(this.getSqlInfo['data.types'], function(type) { 
+            return type['p4.type'] == nFieldType; 
+        });
+
+        if( objType ) {
+            cSQLType = ( this.useUppercase() ) ? objType['sql.type'].toUpperCase() : objType['sql.type'];
+        }
+        
+        return cSQLType;
+    },
+
+    /**
+     * Gets the fallback sql type.
+     *
+     * @return     {string}  The fallback sql type.
+     */
+    getFallbackSqlType : function() {
+        var objType = _.find(this.sqlInfo['data.types'], function(type) { 
+            return type['p4.type'] == 2; 
+        });
+
+        var cSQLType = (this.useUppercase() ) ? objType['sql.type'].toUpperCase() : objType['sql.type'];
+
+        return cSQLType;  
+    },
+
+    /**
+     * Determines if the sql types should be uppercase
+     *
+     * @return     {Boolean}
+     */
+    useUppercase : function() {
+        return system.functions.val(system.functions.nullsub(this.sqlInfo['uppercase.flg'], false),4) == true;
+    },
+
+    /**
+     * Determines if the defined field type has the "Get Size" option.
+     *
+     * @param      {Number}   nFieldType  The field type
+     *
+     * @return     {Boolean}  True if has size, False otherwise.
+     */
+    hasSize : function(nFieldType) {
+
+        var objType = _.find(this.sqlInfo['data.types'], function(type) { 
+            return type['p4.type'] == nFieldType; 
+        });
+
+        return system.functions.val(system.functions.nullsub(objType['get.size'], false),4) == true;
     }
 });
 
