@@ -1,3 +1,5 @@
+> Currently unmaintained since I have moved from Microfocus Service Manager to ServiceNow - Sorry guys!
+
 # Table of Contents
 
 <!-- MarkdownTOC -->
